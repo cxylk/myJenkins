@@ -1,0 +1,50 @@
+services:
+  myjenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: myjenkins:0.1.0
+    container_name: myjenkins
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    environment:
+      APP_SECRET: ${APP_SECRET:-}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      MAX_CONCURRENCY: ${MAX_CONCURRENCY:-2}
+      LOG_MAX_BYTES: ${LOG_MAX_BYTES:-52428800}
+      LOG_RETENTION_DAYS: ${LOG_RETENTION_DAYS:-90}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+      ALLOW_FILE_REPOS: ${ALLOW_FILE_REPOS:-false}
+      ALLOW_INSECURE_GIT: ${ALLOW_INSECURE_GIT:-false}
+      GIT_TIMEOUT_MS: ${GIT_TIMEOUT_MS:-120000}
+      UPLOAD_TIMEOUT_MS: ${UPLOAD_TIMEOUT_MS:-1800000}
+      MAX_BUILD_MINUTES: ${MAX_BUILD_MINUTES:-240}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - ./data:/data
+      # 工作区与 pnpm store 放到 named volume（容器内 ext4），
+      # 避免 Windows bind mount 的小文件 I/O 拖慢 git 检出与依赖安装。
+      - workspaces:/data/workspaces
+      - pnpm-store:/data/pnpm-store
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  workspaces:
+  pnpm-store:
+
+# 可选：本地联调用的 SSH 目标机（生产环境请使用真实服务器）
+#   docker compose -f docker-compose.yml -f docker-compose.test.yml up -d

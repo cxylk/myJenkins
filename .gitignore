@@ -1,0 +1,21 @@
+node_modules/
+dist/
+data/
+.env
+*.local
+coverage/
+.DS_Store
+Thumbs.db
+*.log
+!pnpm-lock.yaml
+.e2e/
+.tmp/
+.test-data/
+
+.pnpm-store/
+
+# Claude Code 本地权限配置
+.claude/settings.local.json
+
+# 本地测试用的仓库（ALLOW_FILE_REPOS 测试产物）
+docs/myJenkins/

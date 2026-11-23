@@ -1,0 +1,15 @@
+services:
+  ssh-target:
+    image: linuxserver/openssh-server:latest
+    container_name: myjenkins-ssh-target
+    restart: unless-stopped
+    ports:
+      - "2222:2222"
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Asia/Shanghai
+      USER_NAME: deploy
+      USER_PASSWORD: ${SSH_TARGET_PASSWORD:-deploy-pass-123}
+      PASSWORD_ACCESS: "true"
+      SUDO_ACCESS: "false"
